@@ -69,6 +69,7 @@ interface GameStore {
   
   // Actions - Guidelines
   answerGuideline: (guidelineId: string, answerId: string) => void;
+  nextGuideline: () => void;
   completeGuidelines: (score: number) => void;
   
   // Actions - Documentation
@@ -391,6 +392,18 @@ export const useGameStore = create<GameStore>()(
           guidelinesState: {
             ...state.guidelinesState,
             answers: { ...state.guidelinesState.answers, [guidelineId]: answerId },
+            // NOTE: Do NOT increment currentGuidelineIndex here!
+            // The component needs to show feedback for the current guideline first.
+            // Incrementing is done via nextGuideline() when the user clicks "Next".
+          },
+        });
+      },
+      
+      nextGuideline: () => {
+        const state = get();
+        set({
+          guidelinesState: {
+            ...state.guidelinesState,
             currentGuidelineIndex: state.guidelinesState.currentGuidelineIndex + 1,
           },
         });

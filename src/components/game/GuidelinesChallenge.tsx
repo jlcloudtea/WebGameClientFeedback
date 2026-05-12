@@ -23,6 +23,7 @@ export default function GuidelinesChallenge() {
     currentScenarioId,
     guidelinesState,
     answerGuideline,
+    nextGuideline,
     completeGuidelines,
     setPhase,
   } = useGameStore();
@@ -53,9 +54,6 @@ export default function GuidelinesChallenge() {
   };
 
   const handleNext = () => {
-    setSelectedAnswer(null);
-    setShowFeedback(false);
-
     if (isLastGuideline) {
       // All guidelines done - compute final score
       let totalPossible = 0;
@@ -77,7 +75,13 @@ export default function GuidelinesChallenge() {
       const finalScore = totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
       completeGuidelines(finalScore);
       setCompleted(true);
+    } else {
+      // Advance to next guideline
+      nextGuideline();
     }
+
+    setSelectedAnswer(null);
+    setShowFeedback(false);
   };
 
   const getOptionResult = (option: GuidelineScenario['options'][0]) => {
