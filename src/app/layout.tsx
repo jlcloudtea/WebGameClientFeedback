@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Junior IT Consultant Adventure - Interactive Learning Game",
+  title: "ICT Support Pro - Feedback",
   description:
     "An interactive educational game for vocational IT students to learn how to identify and document client requirements. Practice active listening, questioning techniques, and professional IT consulting skills.",
   keywords: [
