@@ -15,7 +15,7 @@ async function main() {
         'A software installation has just been completed for a client. Design a follow-up survey to assess satisfaction, identify issues, and gather improvement suggestions.',
       difficulty: 'BEGINNER',
       estimatedMin: 15,
-      scenarioData: JSON.stringify({
+      scenarioData: {
         client: {
           name: 'Greenfield Medical Centre',
           contact: 'Dr. Amanda Lee',
@@ -51,8 +51,8 @@ async function main() {
           'Must include at least one open-ended question',
           'Avoid technical jargon — staff are not IT professionals',
         ],
-      }),
-      scoringRubric: JSON.stringify({
+      },
+      scoringRubric: {
         criteria: [
           { name: 'Question Clarity', weight: 25, description: 'Questions are clear and unambiguous' },
           { name: 'Topic Coverage', weight: 25, description: 'All required topics are addressed' },
@@ -62,7 +62,7 @@ async function main() {
         ],
         maxScore: 100,
         passingScore: 60,
-      }),
+      },
     },
     {
       type: 'CUSTOMER_INTERVIEW',
@@ -71,7 +71,7 @@ async function main() {
         'Interview a teacher who is experiencing ongoing IT issues. Use active listening and proper questioning techniques to uncover their real needs.',
       difficulty: 'INTERMEDIATE',
       estimatedMin: 20,
-      scenarioData: JSON.stringify({
+      scenarioData: {
         client: {
           name: 'Mrs. Sarah Chen',
           role: 'Senior English Teacher',
@@ -101,8 +101,8 @@ async function main() {
           'Did you use open-ended questions rather than yes/no?',
           'Did you avoid technical jargon?',
         ],
-      }),
-      scoringRubric: JSON.stringify({
+      },
+      scoringRubric: {
         criteria: [
           { name: 'Active Listening', weight: 30, description: 'Acknowledged feelings, paraphrased concerns' },
           { name: 'Question Quality', weight: 25, description: 'Open-ended, relevant, well-timed questions' },
@@ -112,7 +112,7 @@ async function main() {
         ],
         maxScore: 100,
         passingScore: 60,
-      }),
+      },
     },
     {
       type: 'FEEDBACK_ANALYSIS',
@@ -121,7 +121,7 @@ async function main() {
         'Analyse a set of user feedback from the new library management system. Categorise comments, identify patterns, and determine the priority issues.',
       difficulty: 'INTERMEDIATE',
       estimatedMin: 20,
-      scenarioData: JSON.stringify({
+      scenarioData: {
         system: 'LibraryPro 3.0',
         feedbackPeriod: '1 month post-launch',
         totalResponses: 47,
@@ -141,8 +141,8 @@ async function main() {
         ],
         categories: ['PERFORMANCE', 'USABILITY', 'RELIABILITY', 'BUG', 'UI_DESIGN', 'FEATURE_REQUEST', 'HARDWARE', 'DOCUMENTATION'],
         priorityGuidance: 'Bugs affecting core functionality should be highest priority. Performance issues that affect daily workflows are second. UI/UX improvements come third.',
-      }),
-      scoringRubric: JSON.stringify({
+      },
+      scoringRubric: {
         criteria: [
           { name: 'Categorisation Accuracy', weight: 35, description: 'Correct category assigned to each feedback item' },
           { name: 'Sentiment Accuracy', weight: 20, description: 'Correct sentiment (positive/negative/neutral) identified' },
@@ -152,7 +152,7 @@ async function main() {
         ],
         maxScore: 100,
         passingScore: 60,
-      }),
+      },
     },
     {
       type: 'DIFFICULT_CLIENT',
@@ -161,7 +161,7 @@ async function main() {
         'Handle a call from an executive who is demanding an immediate fix for a problem that requires investigation. De-escalate the situation while maintaining professional standards.',
       difficulty: 'ADVANCED',
       estimatedMin: 25,
-      scenarioData: JSON.stringify({
+      scenarioData: {
         client: {
           name: 'Mr. David Hargrove',
           role: 'Chief Financial Officer',
@@ -187,13 +187,13 @@ async function main() {
             'Follow up proactively — call him back before the promised deadline with an update',
           ],
           hiddenInfo: 'The real issue is a VPN conflict with the video conferencing software — not the laptop itself. Previous tickets were closed as "no fault found" because the tech only checked the hardware.',
-        realSolution: 'Update VPN client and add video conferencing app to the VPN split-tunnel exclusion list.',
+          realSolution: 'Update VPN client and add video conferencing app to the VPN split-tunnel exclusion list.',
         },
         initialMessage:
           "This is UNACCEPTABLE. I am losing THOUSANDS of dollars in deals because your department can't keep a simple laptop working. I want this FIXED. NOW. Not tomorrow, not after a ticket — NOW.",
         timePressure: 'His next international call is in 90 minutes.',
-      }),
-      scoringRubric: JSON.stringify({
+      },
+      scoringRubric: {
         criteria: [
           { name: 'De-escalation', weight: 30, description: 'Successfully reduced client anger without being passive' },
           { name: 'Professionalism', weight: 20, description: 'Maintained composure and professional standards' },
@@ -203,7 +203,7 @@ async function main() {
         ],
         maxScore: 100,
         passingScore: 70,
-      }),
+      },
     },
     {
       type: 'SERVICE_IMPROVEMENT',
@@ -212,7 +212,7 @@ async function main() {
         'Based on aggregated feedback data, create an improvement plan for the school IT help desk. Identify key areas, set priorities, and recommend actionable changes.',
       difficulty: 'ADVANCED',
       estimatedMin: 25,
-      scenarioData: JSON.stringify({
+      scenarioData: {
         service: 'School IT Help Desk',
         feedbackSummary: {
           totalTickets: 342,
@@ -263,8 +263,8 @@ async function main() {
           'Must be implementable within the current school term (10 weeks)',
         ],
         stakeholders: ['IT Staff', 'Teachers', 'Administration', 'Students'],
-      }),
-      scoringRubric: JSON.stringify({
+      },
+      scoringRubric: {
         criteria: [
           { name: 'Priority Assessment', weight: 25, description: 'Correctly identified highest impact improvements' },
           { name: 'Actionability', weight: 25, description: 'Recommendations are specific and implementable' },
@@ -274,7 +274,7 @@ async function main() {
         ],
         maxScore: 100,
         passingScore: 60,
-      }),
+      },
     },
   ]
 

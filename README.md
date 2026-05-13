@@ -32,8 +32,8 @@ ICT Support Pro immerses students in role-play scenarios where they practice ess
 - **Framework**: [Next.js 16](https://nextjs.org/) with App Router
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 4 + [shadcn/ui](https://ui.shadcn.com/) (New York style)
-- **Database**: Prisma ORM with SQLite
-- **State Management**: Zustand
+- **Database**: Prisma ORM with PostgreSQL (Vercel Postgres / Neon)
+- **State Management**: Zustand (client-side game state with localStorage persistence)
 - **AI**: z-ai-web-dev-sdk (LLM for dialogue generation)
 - **Drag & Drop**: @dnd-kit/core
 - **Animations**: Framer Motion
@@ -44,9 +44,9 @@ ICT Support Pro immerses students in role-play scenarios where they practice ess
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18+ or [Bun](https://bun.sh/)
-- Git
+- PostgreSQL database (local, Docker, or cloud)
 
-### Installation
+### Local Development
 
 ```bash
 # Clone the repository
@@ -58,10 +58,13 @@ bun install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env if needed — default uses local SQLite
+# Edit .env with your PostgreSQL connection string
 
-# Set up the database
-bun run db:push
+# Create the database and run migrations
+bun run db:migrate
+
+# Seed the database with mission templates and badges
+bun run db:seed
 
 # Start the development server
 bun run dev
@@ -69,11 +72,128 @@ bun run dev
 
 The app will be available at `http://localhost:3000`.
 
+### Using Docker for PostgreSQL
+
+If you don't have PostgreSQL installed locally, you can use Docker:
+
+```bash
+docker run -d \
+  --name ict-support-pro-db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=ict_support_pro \
+  -p 5432:5432 \
+  postgres:16-alpine
+```
+
+Then set your `.env`:
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ict_support_pro
+```
+
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `file:./db/custom.db` | SQLite database connection string |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+
+## Deploy to Vercel (Free Plan)
+
+Yes, this project is fully compatible with Vercel's free plan! Here's how to deploy it:
+
+### Step 1: Push to GitHub
+
+Make sure your code is pushed to a GitHub repository.
+
+### Step 2: Create a Vercel Postgres Database
+
+1. Go to [vercel.com](https://vercel.com) and sign up / log in
+2. Go to the **Storage** tab in your Vercel dashboard
+3. Click **Create Database** → select **Postgres (Neon)**
+4. Choose the **Free** plan (0.5 GB storage, 100 compute hours/month)
+5. Give it a name (e.g., `ict-support-pro-db`) and click **Create**
+6. Copy the connection string — you'll need it in Step 4
+
+> **Free plan limits**: 0.5 GB storage, 100 compute hours/month — more than enough for this project.
+
+### Step 3: Import Your Project
+
+1. In Vercel dashboard, click **Add New** → **Project**
+2. Import your GitHub repository
+3. Keep the default Framework Preset (**Next.js**)
+
+### Step 4: Configure Environment Variables
+
+In the project setup screen, add the following environment variable:
+
+| Key | Value |
+|-----|-------|
+| `DATABASE_URL` | Your Vercel Postgres connection string from Step 2 |
+
+If you connected the Vercel Postgres database to your project, the `DATABASE_URL` may already be set automatically.
+
+### Step 5: Configure Build Settings
+
+Update the **Build Command** to include database migrations:
+
+```
+npx prisma migrate deploy && next build
+```
+
+Or if using Bun:
+
+```
+bunx prisma migrate deploy && next build
+```
+
+This ensures your database schema is applied before each deployment.
+
+### Step 6: Deploy
+
+Click **Deploy** and wait for the build to complete. Vercel will:
+1. Install dependencies
+2. Run Prisma migrations
+3. Build the Next.js app
+4. Deploy to a `.vercel.app` URL
+
+### Step 7: Seed the Database
+
+After the first deployment, seed the database with initial data:
+
+```bash
+# Option A: Using Vercel CLI
+npx vercel env pull .env.local   # Pull production env vars
+bunx prisma db seed              # Seed using the local env
+
+# Option B: Using the Vercel dashboard
+# Go to your project → Settings → Environment Variables
+# Copy the DATABASE_URL, then run locally:
+DATABASE_URL="your-production-url" bunx prisma db seed
+```
+
+### Step 8: Visit Your App
+
+Your app is now live at `https://your-project.vercel.app`! 🎉
+
+### Updating Your Deployment
+
+Every time you push to the `main` branch, Vercel will automatically:
+1. Run `prisma migrate deploy` (applies any new migrations)
+2. Build and deploy the updated app
+
+For schema changes, create a migration first:
+```bash
+bun run db:migrate    # Creates and applies the migration locally
+git add prisma/migrations
+git commit -m "Add new migration"
+git push              # Triggers Vercel deployment
+```
+
+### Alternative: Deploy Without a Database
+
+Since the core game logic runs entirely client-side (using Zustand + localStorage), you can also deploy the app without a database. The game will work perfectly for solo play — only the cross-device leaderboard feature requires a database.
+
+To deploy without a database, simply skip Steps 2, 5, 7 and set a placeholder `DATABASE_URL` — the app will gracefully handle any database errors.
 
 ## Project Structure
 
@@ -144,8 +264,35 @@ src/
 | `bun run lint` | Run ESLint checks |
 | `bun run db:push` | Push Prisma schema to database |
 | `bun run db:generate` | Generate Prisma client |
-| `bun run db:migrate` | Run database migrations |
+| `bun run db:migrate` | Create and run database migration |
+| `bun run db:migrate:deploy` | Apply pending migrations (for production) |
 | `bun run db:reset` | Reset database |
+| `bun run db:seed` | Seed database with initial data |
+
+## Vercel Free Plan Limits
+
+| Resource | Free Plan Limit | This Project's Usage |
+|----------|----------------|---------------------|
+| Bandwidth | 100 GB/month | < 1 GB (lightweight app) |
+| Serverless Function Executions | Unlimited | ✅ |
+| Serverless Function Duration | 10 sec (default) | ✅ (API routes are fast) |
+| Vercel Postgres Storage | 0.5 GB | < 10 MB |
+| Vercel Postgres Compute | 100 hours/month | ~5-10 hours for classroom use |
+| Deployments | 100/day | ✅ |
+
+## Troubleshooting
+
+### Build errors on Vercel
+- Make sure `DATABASE_URL` is set in Vercel environment variables
+- Make sure the build command includes `prisma migrate deploy`
+
+### Database connection errors
+- Verify your `DATABASE_URL` includes `?sslmode=require` for Neon/Vercel Postgres
+- Check that the database is active in your Vercel Storage dashboard
+
+### Leaderboard not showing data
+- Run `bun run db:seed` to populate the database
+- The leaderboard works from localStorage even without a database
 
 ## License
 

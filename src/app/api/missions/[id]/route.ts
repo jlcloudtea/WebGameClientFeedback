@@ -14,13 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Mission not found' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      mission: {
-        ...mission,
-        scenarioData: JSON.parse(mission.scenarioData),
-        scoringRubric: JSON.parse(mission.scoringRubric),
-      },
-    });
+    return NextResponse.json({ mission });
   } catch (error) {
     console.error('Fetch mission error:', error);
     return NextResponse.json({ error: 'Failed to fetch mission' }, { status: 500 });

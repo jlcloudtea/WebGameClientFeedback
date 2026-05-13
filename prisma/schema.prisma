@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,12 +16,12 @@ model Player {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  roomPlayers    RoomPlayer[]
-  scores         Score[]
-  badges         PlayerBadge[]
-  surveys        Survey[]
+  roomPlayers     RoomPlayer[]
+  scores          Score[]
+  badges          PlayerBadge[]
+  surveys         Survey[]
   surveyResponses SurveyResponse[]
-  dialogueLogs   DialogueLog[]
+  dialogueLogs    DialogueLog[]
   feedbackAnalyses FeedbackAnalysis[]
   improvementPlans ImprovementPlan[]
 }
@@ -84,8 +84,8 @@ model MissionTemplate {
   title         String
   description   String
   difficulty    String   @default("BEGINNER")
-  scenarioData  String   @default("{}")
-  scoringRubric String   @default("{}")
+  scenarioData  Json     @default("{}")
+  scoringRubric Json     @default("{}")
   estimatedMin  Int      @default(15)
   createdAt     DateTime @default(now())
 
@@ -117,7 +117,7 @@ model Score {
   playerId          String
   roomMissionId     String
   points            Int      @default(0)
-  breakdown         String   @default("{}")
+  breakdown         Json     @default("{}")
   clientSatisfaction Int     @default(0)
   timeTakenSec      Int      @default(0)
   completedAt       DateTime @default(now())
@@ -171,7 +171,7 @@ model SurveyQuestion {
   order    Int     @default(0)
   type     String
   text     String
-  options  String  @default("[]")
+  options  Json    @default("[]")
   required Boolean @default(true)
   createdAt DateTime @default(now())
 
@@ -182,7 +182,7 @@ model SurveyResponse {
   id          String   @id @default(cuid())
   surveyId    String
   playerId    String
-  answers     String   @default("{}")
+  answers     Json     @default("{}")
   submittedAt DateTime @default(now())
 
   survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
@@ -220,8 +220,8 @@ model ImprovementPlan {
   id              String   @id @default(cuid())
   playerId        String
   roomMissionId   String
-  recommendations String   @default("[]")
-  actionItems     String   @default("[]")
+  recommendations Json     @default("[]")
+  actionItems     Json     @default("[]")
   overallScore    Float    @default(0)
   createdAt       DateTime @default(now())
 

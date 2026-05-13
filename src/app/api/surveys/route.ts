@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
             order: i,
             type: q.type,
             text: q.text,
-            options: JSON.stringify(q.options ?? []),
+            options: q.options ?? [],
             required: q.required ?? true,
           })),
         },

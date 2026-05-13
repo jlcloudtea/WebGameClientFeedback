@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
       data: {
         playerId,
         roomMissionId,
-        recommendations: JSON.stringify(recommendations ?? []),
-        actionItems: JSON.stringify(actionItems ?? []),
+        recommendations: recommendations ?? [],
+        actionItems: actionItems ?? [],
         overallScore: 0,
       },
     });

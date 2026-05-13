@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         playerId,
         roomMissionId,
         points: points ?? 0,
-        breakdown: JSON.stringify(breakdown ?? {}),
+        breakdown: breakdown ?? {},
         clientSatisfaction: clientSatisfaction ?? 0,
         timeTakenSec: timeTakenSec ?? 0,
       },

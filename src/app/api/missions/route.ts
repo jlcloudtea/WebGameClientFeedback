@@ -7,13 +7,7 @@ export async function GET() {
       orderBy: { createdAt: 'asc' },
     });
 
-    const parsed = missions.map((m) => ({
-      ...m,
-      scenarioData: JSON.parse(m.scenarioData),
-      scoringRubric: JSON.parse(m.scoringRubric),
-    }));
-
-    return NextResponse.json({ missions: parsed });
+    return NextResponse.json({ missions });
   } catch (error) {
     console.error('Fetch missions error:', error);
     return NextResponse.json({ error: 'Failed to fetch missions' }, { status: 500 });

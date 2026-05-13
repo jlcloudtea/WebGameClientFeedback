@@ -45,10 +45,11 @@ export default function LeaderboardPage() {
 
   // Fetch leaderboard from API
   useEffect(() => {
-    fetch('/api/scores/leaderboard?XTransformPort=3000')
-      .then((res) => (res.ok ? res.json() : []))
+    fetch('/api/scores/leaderboard')
+      .then((res) => (res.ok ? res.json() : { leaderboard: [] }))
       .then((data) => {
-        if (Array.isArray(data)) setServerEntries(data);
+        const entries = data?.leaderboard ?? (Array.isArray(data) ? data : []);
+        setServerEntries(entries);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
