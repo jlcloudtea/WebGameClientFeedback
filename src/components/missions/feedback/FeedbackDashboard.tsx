@@ -189,6 +189,12 @@ export default function FeedbackDashboard() {
       hasLoadedRef.current = true;
       setItems(SCENARIO_FEEDBACK_ITEMS);
       setCategories(CATEGORY_DEFINITIONS.map((c) => c.name));
+
+      // Force layout recalculation after data loads.
+      // This fixes ScrollArea and Recharts ResponsiveContainer measuring 0 on first render.
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
     }
   }, [setItems, setCategories]);
 
@@ -403,7 +409,6 @@ export default function FeedbackDashboard() {
                       return (
                         <motion.div
                           key={item.id}
-                          layout
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -20 }}
@@ -519,7 +524,7 @@ export default function FeedbackDashboard() {
               const categoryItems = itemsByCategory[category] ?? [];
 
               return (
-                <motion.div key={category} layout>
+                <motion.div key={category}>
                   <Card className="rounded-xl border-2 border-slate-200 shadow-sm py-0 gap-0 hover:shadow-md transition-shadow">
                     {/* Header with gradient */}
                     <div className={`bg-gradient-to-r ${gradient} rounded-t-[10px] px-4 py-2.5`}>

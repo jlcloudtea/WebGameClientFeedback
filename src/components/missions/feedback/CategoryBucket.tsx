@@ -31,7 +31,7 @@ export default function CategoryBucket({ category, items, onRemoveItem }: Catego
   const gradient = def?.color ?? 'from-slate-400 to-slate-500';
 
   return (
-    <motion.div layout>
+    <motion.div>
       <Card className="rounded-xl border-2 border-slate-200 shadow-sm py-0 gap-0 hover:shadow-md transition-shadow">
         {/* Header with gradient */}
         <div className={`bg-gradient-to-r ${gradient} rounded-t-[10px] px-4 py-2.5`}>

@@ -96,6 +96,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ict_support_pro
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `CRON_SECRET` | Recommended | Secret key to protect the `/api/admin/cleanup` endpoint |
 
 ## Deploy to Vercel (Free Plan)
 
@@ -195,6 +196,74 @@ Since the core game logic runs entirely client-side (using Zustand + localStorag
 
 To deploy without a database, simply skip Steps 2, 5, 7 and set a placeholder `DATABASE_URL` — the app will gracefully handle any database errors.
 
+## Monitoring & Maintenance
+
+### Health Check Endpoint
+
+The app provides a health check endpoint for uptime monitoring:
+
+```
+GET https://your-project.vercel.app/api/health
+```
+
+Returns database connectivity status, player/score counts, and response latency.
+
+### Weekly Database Cleanup
+
+The app includes an endpoint to clean up old data (solo scores older than 7 days and orphaned players):
+
+```
+# Dry-run (preview what would be deleted)
+GET https://your-project.vercel.app/api/admin/cleanup?secret=YOUR_CRON_SECRET
+
+# Actually delete old data
+POST https://your-project.vercel.app/api/admin/cleanup?secret=YOUR_CRON_SECRET
+```
+
+> **Security**: The cleanup endpoint requires a `CRON_SECRET` environment variable. Set this in your Vercel dashboard under **Settings → Environment Variables**.
+
+### Set Up cron-job.org (Free)
+
+You can use [cron-job.org](https://cron-job.org) to schedule automatic cleanup and health checks:
+
+#### Health Monitor (every 15 minutes)
+1. Create a free account at [cron-job.org](https://cron-job.org)
+2. Click **Create Cron Job**
+3. Set **URL** to: `https://your-project.vercel.app/api/health`
+4. Set **Method** to: `GET`
+5. Set **Schedule** to: Every 15 minutes
+6. Set **Timezone** to your local timezone
+7. Click **Create**
+
+#### Weekly Cleanup (every Monday at 3 AM)
+1. Click **Create Cron Job**
+2. Set **URL** to: `https://your-project.vercel.app/api/admin/cleanup?secret=YOUR_CRON_SECRET`
+3. Set **Method** to: `POST`
+4. Set **Schedule** to: Every Monday at 03:00
+5. Set **Timezone** to your local timezone
+6. Replace `YOUR_CRON_SECRET` with the same value you set in Vercel's `CRON_SECRET` environment variable
+7. Click **Create**
+
+### Verifying Cleanup in Neon Console
+
+After running the cleanup, you can verify in the Neon SQL Editor:
+
+```sql
+-- Check remaining solo scores
+SELECT count(*) FROM "Score" WHERE "roomMissionId" IS NULL;
+
+-- Check for orphaned players (should return 0 rows)
+SELECT p.nickname FROM "Player" p
+LEFT JOIN "Score" s ON s."playerId" = p.id
+LEFT JOIN "RoomPlayer" rp ON rp."playerId" = p.id
+WHERE s.id IS NULL AND rp.id IS NULL;
+
+-- Check old scores that would be cleaned up
+SELECT count(*) FROM "Score"
+WHERE "completedAt" < NOW() - INTERVAL '7 days'
+AND "roomMissionId" IS NULL;
+```
+
 ## Project Structure
 
 ```
@@ -208,7 +277,9 @@ src/
 │       ├── feedback/analyze/     # Feedback analysis endpoint
 │       ├── improvement/          # Service improvement endpoint
 │       ├── surveys/              # Survey CRUD & evaluation
-│       └── scores/               # Score & leaderboard endpoints
+│       ├── scores/               # Score endpoints (submit, batch, leaderboard)
+│       ├── admin/cleanup/        # Weekly DB cleanup (cron-ready)
+│       └── health/               # Health check & uptime monitoring
 ├── components/
 │   ├── game/                     # Game dashboard, mission cards, achievements, leaderboard
 │   ├── login/                    # Nickname entry & avatar selection
@@ -293,6 +364,8 @@ src/
 ### Leaderboard not showing data
 - Run `bun run db:seed` to populate the database
 - The leaderboard works from localStorage even without a database
+- Scores are synced to the database when you visit the Leaderboard page or complete all 5 missions
+- Only your own scores will appear until other players use the app
 
 ## License
 

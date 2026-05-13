@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,33 @@ const SENTIMENT_COLORS: Record<string, string> = {
   negative: '#ef4444',
   neutral: '#f59e0b',
 };
+
+/**
+ * Wrapper that forces ResponsiveContainer to recalculate dimensions
+ * after mount. Fixes the "blank chart until resize" bug.
+ */
+function ChartWrapper({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  const initializedRef = useRef<boolean | null>(null);
+
+  // Initialize once using the null-check pattern approved by React lint rules
+  if (initializedRef.current === null) {
+    initializedRef.current = true;
+    // Schedule the resize event for after mount
+    queueMicrotask(() => {
+      setMounted(true);
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 100);
+    });
+  }
+
+  return (
+    <div className="h-[250px] w-full">
+      {mounted ? children : <div className="h-full flex items-center justify-center text-xs text-slate-400">Loading chart...</div>}
+    </div>
+  );
+}
 
 export default function AnalysisChart({ items, categorized, correctCategories }: AnalysisChartProps) {
   // Category distribution chart data
@@ -173,7 +200,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
+            <ChartWrapper>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryData} layout="vertical" margin={{ left: 20 }}>
                   <XAxis type="number" allowDecimals={false} />
@@ -192,7 +219,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartWrapper>
           </CardContent>
         </Card>
 
@@ -205,7 +232,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
+            <ChartWrapper>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={sentimentData}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
@@ -224,7 +251,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartWrapper>
           </CardContent>
         </Card>
       </div>
@@ -239,7 +266,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
+            <ChartWrapper>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryAccuracyData} layout="vertical" margin={{ left: 20 }}>
                   <XAxis type="number" allowDecimals={false} />
@@ -256,7 +283,7 @@ export default function AnalysisChart({ items, categorized, correctCategories }:
                   <Bar dataKey="Incorrect" fill="#ef4444" radius={[0, 4, 4, 0]} stackId="a" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartWrapper>
           </CardContent>
         </Card>
       )}
