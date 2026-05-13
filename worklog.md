@@ -464,3 +464,20 @@ Stage Summary:
 - Avatars changed to company role avatars (Account Manager, Service Lead, etc.)
 - Badge auto-earning implemented for 9 of 10 badges
 - Zero lint errors, app fully functional
+---
+Task ID: bugfix-batch-1
+Agent: main
+Task: Fix 6 issues reported by user in ICT Customer Service Simulation Game
+
+Work Log:
+- Fixed customer interview scroll jump: Changed auto-scroll to use scrollRef.scrollTop instead of scrollIntoView to prevent page-level scroll, added delay for React render completion
+- Added placeholder examples in survey builder: Created QUESTION_EXAMPLES map with type-specific examples, updated createQuestion to add better default options and scale labels, updated QuestionEditor to use dynamic placeholders
+- Fixed feedback analysis blank screen: Used useRef guard instead of useState for data loading to prevent lint errors and ensure data loads reliably on mount
+- Fixed difficult client no-option issue: Added closing choices to node-5 and node-5b so player has options to click, added isComplete prop to BranchingDialogue, added completion message in dialogue area
+- Removed AI suggest button from service improvement: Removed handleAISuggest, suggestLoading, onSuggest prop from RecommendationForm and ImprovementScreen
+- Removed join classroom and teacher login: Removed multiplayer button and teacher link from NicknameEntry, removed ModeSelector/LobbyRoom/TeacherDashboard from page.tsx routing
+
+Stage Summary:
+- All 6 user-reported issues have been fixed
+- Lint passes clean
+- Dev server compiles successfully

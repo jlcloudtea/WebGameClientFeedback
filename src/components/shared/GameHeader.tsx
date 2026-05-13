@@ -11,12 +11,12 @@ import { motion } from 'framer-motion';
 
 const phaseLabels: Record<string, string> = {
   login: 'Welcome',
-  lobby: 'Lobby',
+  lobby: 'Dashboard',
   dashboard: 'Dashboard',
   'mission-active': 'Mission',
   'mission-summary': 'Summary',
   achievements: 'Achievements',
-  teacher: 'Teacher Mode',
+  teacher: 'Dashboard',
   leaderboard: 'Leaderboard',
 };
 

@@ -16,7 +16,6 @@ import {
   Send,
   Home,
   RotateCcw,
-  Sparkles,
   Trophy,
 } from 'lucide-react';
 import { useImprovementStore } from '@/lib/stores/improvement-store';
@@ -31,11 +30,9 @@ type ViewMode = 'plan' | 'scoring';
 
 export default function ImprovementScreen() {
   const [view, setView] = useState<ViewMode>('plan');
-  const [suggestLoading, setSuggestLoading] = useState(false);
 
   const recommendations = useImprovementStore((s) => s.recommendations);
   const actionItems = useImprovementStore((s) => s.actionItems);
-  const addRecommendation = useImprovementStore((s) => s.addRecommendation);
   const resetImprovement = useImprovementStore((s) => s.resetImprovement);
   const completeMission = useGameStore((s) => s.completeMission);
   const setPhase = useGameStore((s) => s.setPhase);
@@ -69,52 +66,6 @@ export default function ImprovementScreen() {
     resetImprovement();
     setView('plan');
   }, [resetImprovement]);
-
-  const handleAISuggest = useCallback(async () => {
-    setSuggestLoading(true);
-    try {
-      const res = await fetch('/api/improvement/suggest?XTransformPort=3000', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackCount: 16, topIssues: ['Response Time', 'Reliability', 'Accessibility'] }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.recommendations) {
-          for (const rec of data.recommendations) {
-            addRecommendation({
-              title: rec.title ?? 'AI Suggestion',
-              description: rec.description ?? '',
-              impact: rec.impact ?? 'medium',
-              effort: rec.effort ?? 'medium',
-            });
-          }
-        }
-      }
-    } catch {
-      // Fallback: add some default suggestions
-      addRecommendation({
-        title: 'Implement Priority Ticket Escalation',
-        description: 'Create an automated escalation path for urgent tickets to reduce response time from 8+ hours to under 2 hours.',
-        impact: 'high',
-        effort: 'medium',
-      });
-      addRecommendation({
-        title: 'VPN Infrastructure Upgrade',
-        description: 'Replace water-damaged connection hardware and add redundancy to prevent peak-hour VPN drops.',
-        impact: 'high',
-        effort: 'high',
-      });
-      addRecommendation({
-        title: 'Accessibility Compliance Audit',
-        description: 'Conduct a full accessibility audit of the support portal and implement screen-reader compatibility.',
-        impact: 'medium',
-        effort: 'medium',
-      });
-    } finally {
-      setSuggestLoading(false);
-    }
-  }, [addRecommendation]);
 
   const canSubmit = recommendations.length >= 2 && actionItems.length >= 1;
 
@@ -269,7 +220,7 @@ export default function ImprovementScreen() {
         </div>
         <span className="text-slate-300">•</span>
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Sparkles className="h-4 w-4 text-violet-500" />
+          <Trophy className="h-4 w-4 text-violet-500" />
           <span>{recommendations.filter((r) => r.approved).length} approved</span>
         </div>
       </div>
@@ -300,7 +251,7 @@ export default function ImprovementScreen() {
         </TabsContent>
 
         <TabsContent value="recommendations">
-          <RecommendationForm onSuggest={handleAISuggest} />
+          <RecommendationForm />
         </TabsContent>
 
         <TabsContent value="actions">

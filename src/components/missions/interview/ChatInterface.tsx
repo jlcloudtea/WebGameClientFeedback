@@ -123,7 +123,6 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [interviewDone, setInterviewDone] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasStarted = useRef(false);
 
   // --- startTurn callback (defined BEFORE the effect that uses it) ---
@@ -164,15 +163,20 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     }
   }, [currentTurn, isProcessing, startTurn]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom — scroll the chat container, not the page
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    // Use a small delay to let React finish rendering
+    const timer = setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [messages, isAiTyping]);
 
   // --- handleChoice callback ---
   const handleChoice = useCallback((choice: DialogueChoice) => {
+    // Prevent page scroll by scrolling the chat container after choice
     addPlayerMessage(choice.text, choice.id);
     setChoices([]);
 
@@ -187,7 +191,12 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
     setCurrentTurn(nextTurn);
 
     setIsProcessing(true);
+
+    // Keep scroll at bottom after choice selection
     setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
       startTurn(nextTurn);
     }, 500);
   }, [addPlayerMessage, addSystemMessage, currentTurn, setChoices, startTurn, updateClientSatisfaction]);
@@ -282,7 +291,6 @@ export default function ChatInterface({ onComplete }: ChatInterfaceProps) {
           </motion.div>
         )}
 
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Choices area */}

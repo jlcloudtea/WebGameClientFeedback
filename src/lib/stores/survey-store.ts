@@ -35,6 +35,21 @@ interface SurveyActions {
 
 let questionCounter = 0;
 
+// Example placeholder text per question type — guides the user
+export const QUESTION_EXAMPLES: Record<SurveyQuestionType, string> = {
+  'quantitative-rating': 'e.g. How would you rate the overall quality of our IT support service?',
+  'quantitative-multiple': 'e.g. Which type of IT issue do you experience most frequently?',
+  'quantitative-scale': 'e.g. How satisfied are you with the response time of our help desk?',
+  'qualitative-open': 'e.g. Describe a recent IT issue you faced and how it was resolved.',
+  'qualitative-yesno': 'e.g. Have you received adequate training on the current ticketing system?',
+};
+
+const MULTIPLE_CHOICE_EXAMPLES: string[][] = [
+  ['Hardware failure', 'Software issues', 'Network connectivity', 'Account access'],
+  ['Email problems', 'Printing issues', 'VPN/connection', 'File access'],
+  ['Slow performance', 'Security concerns', 'Data backup', 'Other'],
+];
+
 function createQuestion(type: SurveyQuestionType): SurveyQuestionDraft {
   questionCounter += 1;
   const base: SurveyQuestionDraft = {
@@ -46,9 +61,12 @@ function createQuestion(type: SurveyQuestionType): SurveyQuestionDraft {
 
   switch (type) {
     case 'quantitative-multiple':
-      return { ...base, options: ['Option 1', 'Option 2', 'Option 3'] };
+      return {
+        ...base,
+        options: MULTIPLE_CHOICE_EXAMPLES[questionCounter % MULTIPLE_CHOICE_EXAMPLES.length],
+      };
     case 'quantitative-scale':
-      return { ...base, scaleMin: 1, scaleMax: 5, scaleLabel: '' };
+      return { ...base, scaleMin: 1, scaleMax: 5, scaleLabel: 'Strongly Disagree → Strongly Agree' };
     case 'quantitative-rating':
       return { ...base, scaleMin: 1, scaleMax: 5 };
     default:

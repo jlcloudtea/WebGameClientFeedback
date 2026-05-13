@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -170,10 +170,14 @@ export default function FeedbackDashboard() {
   const [view, setView] = useState<ViewMode>('categorize');
   const [activeItem, setActiveItem] = useState<FeedbackItem | null>(null);
 
-  // Load feedback items on mount
+  // Load feedback items on mount — with guard to prevent repeated loading
+  const hasLoadedRef = useRef(false);
   useEffect(() => {
-    setItems(SCENARIO_FEEDBACK_ITEMS);
-    setCategories(CATEGORY_DEFINITIONS.map((c) => c.name));
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      setItems(SCENARIO_FEEDBACK_ITEMS);
+      setCategories(CATEGORY_DEFINITIONS.map((c) => c.name));
+    }
   }, [setItems, setCategories]);
 
   // DnD sensors

@@ -42,6 +42,7 @@ interface BranchingDialogueProps {
   onEscalationFailure: () => void;
   clientSatisfaction: number;
   clientPatience: number;
+  isComplete?: boolean;
 }
 
 export default function BranchingDialogue({
@@ -49,6 +50,7 @@ export default function BranchingDialogue({
   onEscalationFailure,
   clientSatisfaction,
   clientPatience,
+  isComplete = false,
 }: BranchingDialogueProps) {
   const messages = useDialogueStore((s) => s.messages);
   const choices = useDialogueStore((s) => s.choices);
@@ -251,7 +253,11 @@ export default function BranchingDialogue({
       {/* Feedback for selected choice */}
       {choices.length === 0 && messages.length > 0 && !isAiTyping && (
         <div className="text-center py-2">
-          <p className="text-xs text-slate-400">Waiting for client response...</p>
+          {isComplete ? (
+            <p className="text-sm text-emerald-600 font-semibold">✅ Conversation complete! Click "Complete Mission" to see your results.</p>
+          ) : (
+            <p className="text-xs text-slate-400">Waiting for client response...</p>
+          )}
         </div>
       )}
     </div>

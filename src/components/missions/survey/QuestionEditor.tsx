@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSurveyStore } from '@/lib/stores/survey-store';
+import { useSurveyStore, QUESTION_EXAMPLES } from '@/lib/stores/survey-store';
 import { SURVEY_QUESTION_TYPES } from '@/lib/constants';
 import type { SurveyQuestionType } from '@/lib/stores/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -101,7 +101,7 @@ export default function QuestionEditor() {
                 onChange={(e) =>
                   updateQuestion(question.id, { text: e.target.value })
                 }
-                placeholder="Enter your question here..."
+                placeholder={QUESTION_EXAMPLES[question.type] ?? 'Enter your question here...'}
                 className="rounded-xl min-h-[80px] text-sm resize-none"
               />
               <p className="text-[10px] text-slate-400">

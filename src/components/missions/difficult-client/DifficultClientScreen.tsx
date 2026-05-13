@@ -308,7 +308,22 @@ const SCENARIO_NODES: ScenarioNode[] = [
     satisfactionDelta: 15,
     patienceDelta: 15,
     revealedNeed: 'Network stability guarantee',
-    choices: [],
+    choices: [
+      {
+        id: 'c5-a',
+        text: 'I\'ll schedule the site visit for this week. You\'ll receive a confirmation email by end of day. It\'s been a pleasure working through this with you, Mr. Collins.',
+        empathyScore: 0.9,
+        professionalismScore: 0.95,
+        feedback: 'Perfect close! You provided a specific timeline and ended on a warm, professional note.',
+      },
+      {
+        id: 'c5-b',
+        text: 'We\'ll get that organised for you. Thanks for your patience today, Mr. Collins.',
+        empathyScore: 0.7,
+        professionalismScore: 0.75,
+        feedback: 'Good ending, but could be more specific about the timeline.',
+      },
+    ],
   },
   {
     id: 'node-5b',
@@ -317,7 +332,22 @@ const SCENARIO_NODES: ScenarioNode[] = [
     emotion: 'neutral',
     satisfactionDelta: 10,
     patienceDelta: 10,
-    choices: [],
+    choices: [
+      {
+        id: 'c5b-a',
+        text: 'You have my word. I\'ll personally follow up with you by Thursday to update you on progress. Thank you for giving us the opportunity to make this right.',
+        empathyScore: 0.8,
+        professionalismScore: 0.85,
+        feedback: 'Strong commitment! Personal follow-up builds trust with a skeptical client.',
+      },
+      {
+        id: 'c5b-b',
+        text: 'Understood. We\'ll make sure someone reaches out. Thanks for your patience.',
+        empathyScore: 0.5,
+        professionalismScore: 0.55,
+        feedback: 'Acceptable, but "someone reaches out" is vague. Be more specific to build confidence.',
+      },
+    ],
   },
 ];
 
@@ -689,6 +719,7 @@ export default function DifficultClientScreen() {
               onEscalationFailure={handleEscalationFailure}
               clientSatisfaction={satisfaction}
               clientPatience={patience}
+              isComplete={isComplete}
             />
 
             {/* Feedback toast */}

@@ -7,7 +7,7 @@ import { AVATAR_OPTIONS } from '@/lib/constants';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { User, Gamepad2, Users, GraduationCap } from 'lucide-react';
+import { User, Gamepad2 } from 'lucide-react';
 
 export default function NicknameEntry() {
   const nickname = useGameStore((s) => s.nickname);
@@ -25,13 +25,6 @@ export default function NicknameEntry() {
     const playerId = `player-${Date.now()}`;
     login(playerId, inputNickname.trim(), selectedAvatar);
     setPhase('dashboard');
-  };
-
-  const handleMultiplayer = () => {
-    if (!canProceed) return;
-    const playerId = `player-${Date.now()}`;
-    login(playerId, inputNickname.trim(), selectedAvatar);
-    setPhase('lobby');
   };
 
   return (
@@ -117,27 +110,6 @@ export default function NicknameEntry() {
                 <Gamepad2 className="h-5 w-5 mr-2" />
                 Start Learning
               </Button>
-
-              <Button
-                onClick={handleMultiplayer}
-                disabled={!canProceed}
-                variant="outline"
-                className="h-12 text-base font-semibold rounded-xl border-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 transition-all"
-              >
-                <Users className="h-5 w-5 mr-2" />
-                Join Classroom
-              </Button>
-            </div>
-
-            {/* Teacher link */}
-            <div className="text-center pt-2">
-              <button
-                onClick={() => setPhase('teacher')}
-                className="text-xs text-slate-400 hover:text-amber-600 transition-colors inline-flex items-center gap-1"
-              >
-                <GraduationCap className="h-3.5 w-3.5" />
-                Teacher Login
-              </button>
             </div>
           </CardContent>
         </Card>

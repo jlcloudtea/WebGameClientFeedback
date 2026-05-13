@@ -2,10 +2,8 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '@/lib/stores/game-store';
-import { useRoomStore } from '@/lib/stores/room-store';
 import GameHeader from '@/components/shared/GameHeader';
 import NicknameEntry from '@/components/login/NicknameEntry';
-import ModeSelector from '@/components/login/ModeSelector';
 import GameDashboard from '@/components/game/GameDashboard';
 import AchievementPopup from '@/components/game/AchievementPopup';
 import MissionBriefing from '@/components/missions/MissionBriefing';
@@ -15,8 +13,6 @@ import InterviewScreen from '@/components/missions/interview/InterviewScreen';
 import DifficultClientScreen from '@/components/missions/difficult-client/DifficultClientScreen';
 import FeedbackDashboard from '@/components/missions/feedback/FeedbackDashboard';
 import ImprovementScreen from '@/components/missions/improvement/ImprovementScreen';
-import LobbyRoom from '@/components/lobby/LobbyRoom';
-import TeacherDashboard from '@/components/teacher/TeacherDashboard';
 import AchievementsPage from '@/components/game/AchievementsPage';
 import LeaderboardPage from '@/components/game/LeaderboardPage';
 import type { AppPhase, MissionType, MissionPhase } from '@/lib/stores/types';
@@ -67,14 +63,11 @@ function MissionContent({ missionType, missionPhase }: { missionType: MissionTyp
 function PhaseContent({ phase }: { phase: AppPhase }) {
   const missionPhase = useGameStore((s) => s.missionPhase);
   const currentMissionType = useGameStore((s) => s.currentMissionType);
-  const room = useRoomStore((s) => s.room);
 
   switch (phase) {
     case 'login':
       return <NicknameEntry />;
     case 'lobby':
-      // If player has joined a room, show lobby room; otherwise show mode selector
-      return room ? <LobbyRoom /> : <ModeSelector />;
     case 'dashboard':
       return <GameDashboard />;
     case 'mission-active':
@@ -89,7 +82,7 @@ function PhaseContent({ phase }: { phase: AppPhase }) {
     case 'achievements':
       return <AchievementsPage />;
     case 'teacher':
-      return <TeacherDashboard />;
+      return <GameDashboard />;
     case 'leaderboard':
       return <LeaderboardPage />;
     default:
@@ -101,15 +94,10 @@ export default function Home() {
   const phase = useGameStore((s) => s.phase);
   const showAchievement = useGameStore((s) => s.showAchievement);
   const missionPhase = useGameStore((s) => s.missionPhase);
-  const room = useRoomStore((s) => s.room);
 
-  // Use mission phase in the key so the component re-mounts on phase changes
-  // Also include room state so lobby re-mounts properly
   const animationKey = phase === 'mission-active'
     ? `mission-${missionPhase}`
-    : phase === 'lobby' && room
-      ? 'lobby-room'
-      : phase;
+    : phase;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-amber-50/30">

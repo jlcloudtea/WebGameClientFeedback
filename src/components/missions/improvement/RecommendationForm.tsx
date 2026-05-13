@@ -17,7 +17,6 @@ import {
   Edit3,
   Check,
   X,
-  Sparkles,
   Lightbulb,
   ChevronDown,
   ChevronUp,
@@ -48,11 +47,7 @@ const EFFORT_COLORS = {
   low: 'bg-emerald-100 text-emerald-700',
 };
 
-interface RecommendationFormProps {
-  onSuggest?: () => void;
-}
-
-export default function RecommendationForm({ onSuggest }: RecommendationFormProps) {
+export default function RecommendationForm() {
   const recommendations = useImprovementStore((s) => s.recommendations);
   const addRecommendation = useImprovementStore((s) => s.addRecommendation);
   const updateRecommendation = useImprovementStore((s) => s.updateRecommendation);
@@ -129,16 +124,6 @@ export default function RecommendationForm({ onSuggest }: RecommendationFormProp
           <Plus className="h-4 w-4 mr-1.5" />
           Add Recommendation
         </Button>
-        {onSuggest && (
-          <Button
-            variant="outline"
-            onClick={onSuggest}
-            className="rounded-xl"
-          >
-            <Sparkles className="h-4 w-4 mr-1.5 text-amber-500" />
-            AI Suggest
-          </Button>
-        )}
       </div>
 
       {/* Form */}
