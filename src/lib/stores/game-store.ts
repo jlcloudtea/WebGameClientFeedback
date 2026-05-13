@@ -78,6 +78,9 @@ interface GameActions {
   // Transition
   setIsTransitioning: (val: boolean) => void;
 
+  // Sync
+  syncScoresToServer: () => Promise<{ synced: number; total: number } | null>;
+
   // Reset
   resetMissionState: () => void;
   resetAll: () => void;
@@ -224,24 +227,10 @@ export const useGameStore = create<GameState & GameActions>()(
           latestBadgeId: firstNewBadge,
         });
 
-        // --- Submit score to database (non-blocking) ---
-        if (state.nickname) {
-          fetch('/api/scores/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nickname: state.nickname,
-              avatar: state.avatar,
-              missionType: score.missionType,
-              totalScore: score.totalScore,
-              xpEarned: score.xpEarned,
-              empathy: score.empathy,
-              professionalism: score.professionalism,
-              timeTakenSec: 0,
-            }),
-          }).catch(() => {
-            // Silently fail — game works offline with localStorage
-          });
+        // Auto-sync when all 5 mission types are completed
+        if (state.nickname && ALL_TYPES.every((t) => completedTypes.has(t))) {
+          // Non-blocking batch sync — all missions done!
+          get().syncScoresToServer().catch(() => {});
         }
       },
 
@@ -265,6 +254,34 @@ export const useGameStore = create<GameState & GameActions>()(
       setShowHint: (show, hint = '') => set({ showHint: show, currentHint: hint }),
 
       setIsTransitioning: (isTransitioning) => set({ isTransitioning }),
+
+      syncScoresToServer: async () => {
+        const state = get();
+        if (!state.nickname || state.missionScores.length === 0) {
+          return null;
+        }
+
+        try {
+          const res = await fetch('/api/scores/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nickname: state.nickname,
+              avatar: state.avatar,
+              xp: state.xp,
+              level: state.level,
+              missionScores: state.missionScores,
+            }),
+          });
+
+          if (!res.ok) return null;
+          const data = await res.json();
+          return { synced: data.synced ?? 0, total: data.total ?? 0 };
+        } catch {
+          // Silently fail — game works offline with localStorage
+          return null;
+        }
+      },
 
       resetMissionState: () => set({ ...initialMissionState, ...initialUiState }),
 

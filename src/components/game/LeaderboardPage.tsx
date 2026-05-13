@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/lib/stores/game-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,9 @@ import {
   Star,
   Zap,
   Target,
+  RefreshCw,
+  Cloud,
+  CloudOff,
 } from 'lucide-react';
 import type { LeaderboardEntry } from '@/lib/stores/types';
 import { getLevelTitle } from '@/lib/constants';
@@ -39,21 +42,13 @@ export default function LeaderboardPage() {
   const level = useGameStore((s) => s.level);
   const missionScores = useGameStore((s) => s.missionScores);
   const completedMissionIds = useGameStore((s) => s.completedMissionIds);
+  const syncScoresToServer = useGameStore((s) => s.syncScoresToServer);
 
   const [serverEntries, setServerEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Fetch leaderboard from API
-  useEffect(() => {
-    fetch('/api/scores/leaderboard')
-      .then((res) => (res.ok ? res.json() : { leaderboard: [] }))
-      .then((data) => {
-        const entries = data?.leaderboard ?? (Array.isArray(data) ? data : []);
-        setServerEntries(entries);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'synced' | 'error'>('idle');
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
 
   // Build current player entry
   const avgScore = missionScores.length > 0
@@ -69,6 +64,46 @@ export default function LeaderboardPage() {
     missionsCompleted: completedMissionIds.length,
     averageScore: avgScore,
   };
+
+  // Sync and fetch leaderboard
+  const syncAndFetch = useCallback(async () => {
+    setSyncing(true);
+    setSyncStatus('idle');
+
+    try {
+      // 1. Sync local scores to database first
+      if (missionScores.length > 0 && nickname) {
+        const result = await syncScoresToServer();
+        if (result) {
+          setSyncStatus('synced');
+          setLastSyncedAt(Date.now());
+        } else {
+          setSyncStatus('error');
+        }
+      }
+    } catch {
+      setSyncStatus('error');
+    }
+
+    // 2. Fetch leaderboard from API
+    try {
+      const res = await fetch('/api/scores/leaderboard');
+      if (res.ok) {
+        const data = await res.json();
+        const entries = data?.leaderboard ?? (Array.isArray(data) ? data : []);
+        setServerEntries(entries);
+      }
+    } catch {
+      // Leaderboard fetch failed — show local data only
+    } finally {
+      setSyncing(false);
+      setLoading(false);
+    }
+  }, [missionScores, nickname, syncScoresToServer]);
+
+  useEffect(() => {
+    syncAndFetch();
+  }, [syncAndFetch]);
 
   // Merge server entries with current player
   const allEntries: LocalLeaderboardEntry[] = [
@@ -120,7 +155,7 @@ export default function LeaderboardPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <Trophy className="h-6 w-6 text-amber-500" />
             Leaderboard
@@ -128,6 +163,30 @@ export default function LeaderboardPage() {
           <p className="text-sm text-slate-500 mt-1">
             See how you rank against other consultants
           </p>
+        </div>
+        {/* Sync status + refresh */}
+        <div className="flex items-center gap-2">
+          {syncStatus === 'synced' && (
+            <Badge variant="secondary" className="text-[10px] gap-1 bg-emerald-50 text-emerald-700">
+              <Cloud className="h-3 w-3" />
+              Synced
+            </Badge>
+          )}
+          {syncStatus === 'error' && (
+            <Badge variant="secondary" className="text-[10px] gap-1 bg-red-50 text-red-700">
+              <CloudOff className="h-3 w-3" />
+              Offline
+            </Badge>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={syncAndFetch}
+            disabled={syncing}
+            className="h-8 w-8"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
       </motion.div>
 
@@ -192,7 +251,12 @@ export default function LeaderboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {allEntries.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-8">
+                <RefreshCw className="h-8 w-8 text-slate-300 mx-auto mb-2 animate-spin" />
+                <p className="text-sm text-slate-500">Loading leaderboard...</p>
+              </div>
+            ) : allEntries.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-10 w-10 text-slate-300 mx-auto mb-2" />
                 <p className="text-sm text-slate-500">No players yet. Complete a mission to get on the board!</p>
@@ -268,7 +332,12 @@ export default function LeaderboardPage() {
         <Card className="rounded-2xl border-0 shadow-sm bg-slate-50">
           <CardContent className="p-4 text-center">
             <p className="text-xs text-slate-500">
-              Leaderboard is updated after each mission. Complete more missions and score higher to climb the ranks!
+              {syncStatus === 'synced'
+                ? `✅ Scores synced to cloud. Last sync: ${lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : 'just now'}`
+                : syncStatus === 'error'
+                  ? '⚠️ Could not sync to cloud. Your scores are saved locally and will sync when you revisit this page.'
+                  : 'Leaderboard is updated when you visit this page. Complete more missions and score higher to climb the ranks!'
+              }
             </p>
           </CardContent>
         </Card>
