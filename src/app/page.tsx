@@ -6,15 +6,19 @@ import { useRoomStore } from '@/lib/stores/room-store';
 import GameHeader from '@/components/shared/GameHeader';
 import NicknameEntry from '@/components/login/NicknameEntry';
 import ModeSelector from '@/components/login/ModeSelector';
-import RoomCodeEntry from '@/components/login/RoomCodeEntry';
 import GameDashboard from '@/components/game/GameDashboard';
 import AchievementPopup from '@/components/game/AchievementPopup';
 import MissionBriefing from '@/components/missions/MissionBriefing';
 import MissionSummary from '@/components/missions/MissionSummary';
 import SurveyBuilder from '@/components/missions/survey/SurveyBuilder';
 import InterviewScreen from '@/components/missions/interview/InterviewScreen';
+import DifficultClientScreen from '@/components/missions/difficult-client/DifficultClientScreen';
+import FeedbackDashboard from '@/components/missions/feedback/FeedbackDashboard';
+import ImprovementScreen from '@/components/missions/improvement/ImprovementScreen';
 import LobbyRoom from '@/components/lobby/LobbyRoom';
 import TeacherDashboard from '@/components/teacher/TeacherDashboard';
+import AchievementsPage from '@/components/game/AchievementsPage';
+import LeaderboardPage from '@/components/game/LeaderboardPage';
 import type { AppPhase, MissionType, MissionPhase } from '@/lib/stores/types';
 
 /** Placeholder components for phases not yet built — these will be replaced later */
@@ -47,11 +51,13 @@ function MissionContent({ missionType, missionPhase }: { missionType: MissionTyp
     case 'survey-builder':
       return <SurveyBuilder />;
     case 'customer-interview':
-    case 'difficult-client':
       return <InterviewScreen />;
+    case 'difficult-client':
+      return <DifficultClientScreen />;
     case 'feedback-analysis':
+      return <FeedbackDashboard />;
     case 'service-improvement':
-      return <PlaceholderPhase name={`${missionType ?? 'Mission'} (Coming Soon)`} />;
+      return <ImprovementScreen />;
     default:
       return <PlaceholderPhase name="Unknown Mission" />;
   }
@@ -81,11 +87,11 @@ function PhaseContent({ phase }: { phase: AppPhase }) {
     case 'mission-summary':
       return <MissionSummary />;
     case 'achievements':
-      return <PlaceholderPhase name="Achievements" />;
+      return <AchievementsPage />;
     case 'teacher':
       return <TeacherDashboard />;
     case 'leaderboard':
-      return <PlaceholderPhase name="Leaderboard" />;
+      return <LeaderboardPage />;
     default:
       return <NicknameEntry />;
   }

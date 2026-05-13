@@ -164,14 +164,64 @@ export const useGameStore = create<GameState & GameActions>()(
           : [...state.completedMissionIds, score.missionId];
         const newXp = state.xp + score.xpEarned;
         const newLevel = computeLevel(newXp);
+        const allScores = [...state.missionScores, score];
+
+        // --- Auto-earn badges ---
+        const newBadges: string[] = [];
+        const has = (id: string) => state.earnedBadgeIds.includes(id) || newBadges.includes(id);
+
+        // First Steps: Complete 1 mission
+        if (!has('first-mission') && newCompleted.length >= 1) {
+          newBadges.push('first-mission');
+        }
+        // Survey Master: Survey score ≥ 80%
+        if (!has('survey-master') && score.missionType === 'survey-builder' && score.totalScore >= 80) {
+          newBadges.push('survey-master');
+        }
+        // Empathy Expert: Empathy score = 100
+        if (!has('empathy-expert') && score.empathy >= 100) {
+          newBadges.push('empathy-expert');
+        }
+        // Quick Thinker: Time bonus > 0
+        if (!has('quick-thinker') && score.timeBonus > 0) {
+          newBadges.push('quick-thinker');
+        }
+        // Five missions: Complete 5 missions
+        if (!has('five-missions') && newCompleted.length >= 5) {
+          newBadges.push('five-missions');
+        }
+        // Perfectionist: Score 100% on any mission
+        if (!has('perfectionist') && score.totalScore >= 100) {
+          newBadges.push('perfectionist');
+        }
+        // Completionist: All 5 mission types done
+        const completedTypes = new Set(allScores.map((s) => s.missionType));
+        const ALL_TYPES: MissionType[] = ['survey-builder', 'customer-interview', 'feedback-analysis', 'difficult-client', 'service-improvement'];
+        if (!has('all-missions') && ALL_TYPES.every((t) => completedTypes.has(t))) {
+          newBadges.push('all-missions');
+        }
+        // Feedback Pro: 100% categorisation accuracy
+        if (!has('feedback-pro') && score.missionType === 'feedback-analysis' && score.accuracy >= 100) {
+          newBadges.push('feedback-pro');
+        }
+        // De-escalator: Angry → Satisfied shift (high satisfaction on difficult-client)
+        if (!has('de-escalator') && score.missionType === 'difficult-client' && score.empathy >= 80 && score.professionalism >= 80) {
+          newBadges.push('de-escalator');
+        }
+
+        const newEarnedBadgeIds = [...state.earnedBadgeIds, ...newBadges];
+        const firstNewBadge = newBadges.length > 0 ? newBadges[0] : state.latestBadgeId;
 
         set({
           completedMissionIds: newCompleted,
-          missionScores: [...state.missionScores, score],
+          missionScores: allScores,
           xp: newXp,
           level: newLevel,
           missionPhase: 'scoring',
           missionTimerActive: false,
+          earnedBadgeIds: newEarnedBadgeIds,
+          showAchievement: newBadges.length > 0 ? true : state.showAchievement,
+          latestBadgeId: firstNewBadge,
         });
       },
 

@@ -241,14 +241,14 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 // --- Avatar Options ---
 
 export const AVATAR_OPTIONS = [
-  { id: 'avatar-1', emoji: '👩‍💻', label: 'Developer' },
-  { id: 'avatar-2', emoji: '👨‍💼', label: 'Consultant' },
-  { id: 'avatar-3', emoji: '👩‍🔬', label: 'Scientist' },
-  { id: 'avatar-4', emoji: '👨‍🔧', label: 'Technician' },
-  { id: 'avatar-5', emoji: '👩‍🏫', label: 'Teacher' },
-  { id: 'avatar-6', emoji: '🧑‍💻', label: 'Analyst' },
-  { id: 'avatar-7', emoji: '👨‍🎓', label: 'Student' },
-  { id: 'avatar-8', emoji: '👩‍🎓', label: 'Graduate' },
+  { id: 'avatar-1', emoji: '🧑‍💼', label: 'Account Manager' },
+  { id: 'avatar-2', emoji: '👩‍💼', label: 'Service Lead' },
+  { id: 'avatar-3', emoji: '🧑‍💻', label: 'Support Analyst' },
+  { id: 'avatar-4', emoji: '👩‍🔧', label: 'Field Technician' },
+  { id: 'avatar-5', emoji: '👨‍💻', label: 'IT Consultant' },
+  { id: 'avatar-6', emoji: '👩‍🏫', label: 'Training Officer' },
+  { id: 'avatar-7', emoji: '🧑‍📋', label: 'QA Reviewer' },
+  { id: 'avatar-8', emoji: '👨‍🔧', label: 'Service Engineer' },
 ];
 
 // --- Timer Defaults ---

@@ -423,3 +423,44 @@ Stage Summary:
 - 5 teacher dashboard components: TeacherLogin, RoomManager, StudentProgress, ClassAnalytics, TeacherDashboard
 - Charts via recharts, all components use 'use client' + shadcn/ui + framer-motion
 - Zero lint errors, app running successfully with socket server on port 3001
+---
+Task ID: 8
+Agent: Main Developer
+Task: Wire up Feedback Analysis, Difficult Client, and Service Improvement missions; replace Achievements and Leaderboard placeholders with working pages; update avatars to company roles; implement badge auto-earning
+
+Work Log:
+- Updated `/home/z/my-project/src/app/page.tsx`:
+  - Added imports for DifficultClientScreen, FeedbackDashboard, ImprovementScreen, AchievementsPage, LeaderboardPage
+  - Changed `difficult-client` case from using generic InterviewScreen to dedicated DifficultClientScreen
+  - Changed `feedback-analysis` and `service-improvement` from PlaceholderPhase to FeedbackDashboard and ImprovementScreen respectively
+  - Changed 'achievements' phase from PlaceholderPhase to AchievementsPage
+  - Changed 'leaderboard' phase from PlaceholderPhase to LeaderboardPage
+  - Removed unused RoomCodeEntry import
+- Created `/home/z/my-project/src/components/game/AchievementsPage.tsx`:
+  - Full achievements page with back button, gradient progress banner, badge grid (earned vs locked), quick stats, mission completion tracker
+  - Shows badge icon, title, description, condition, and XP bonus for each badge
+  - Earned badges have amber highlight and checkmark; unearned are greyed out with lock icon
+- Created `/home/z/my-project/src/components/game/LeaderboardPage.tsx`:
+  - Full leaderboard page with back button, "Your Rank" gradient card, XP/level/missions/avg stats
+  - Fetches server leaderboard from /api/scores/leaderboard and merges with current player
+  - Sorted by XP, top 20 entries with rank icons (crown/medal for top 3)
+  - Current player highlighted with amber border and "You" badge
+  - Custom scrollbar for long lists
+- Updated `/home/z/my-project/src/lib/constants.ts`:
+  - Changed avatars from generic roles (Developer, Consultant, Scientist, etc.) to company-specific roles (Account Manager, Service Lead, Support Analyst, Field Technician, IT Consultant, Training Officer, QA Reviewer, Service Engineer)
+- Updated `/home/z/my-project/src/lib/stores/game-store.ts`:
+  - Added auto-earning logic in completeMission action
+  - Checks 9 badge conditions: first-mission, survey-master, empathy-expert, quick-thinker, five-missions, perfectionist, all-missions, feedback-pro, de-escalator
+  - Badges are checked after each mission completion and earned automatically
+  - First earned badge triggers the AchievementPopup via showAchievement/latestBadgeId
+- Fixed lint error in LeaderboardPage (setState in effect)
+- All changes pass `bun run lint` with zero errors
+- App returns HTTP 200 and renders correctly
+
+Stage Summary:
+- All 5 mission types now have working screens (no more "Under Construction" placeholders)
+- Achievements page shows all badges with earn/lock status
+- Leaderboard page shows player rankings with current player highlighted
+- Avatars changed to company role avatars (Account Manager, Service Lead, etc.)
+- Badge auto-earning implemented for 9 of 10 badges
+- Zero lint errors, app fully functional
