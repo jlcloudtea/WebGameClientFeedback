@@ -481,3 +481,22 @@ Stage Summary:
 - All 6 user-reported issues have been fixed
 - Lint passes clean
 - Dev server compiles successfully
+
+---
+Task ID: feedback-analysis-fix
+Agent: main
+Task: Fix Feedback Analysis blank screen issue - replaced drag-and-drop with click-to-categorize
+
+Work Log:
+- Identified that @dnd-kit/core was likely causing runtime errors that crashed the FeedbackDashboard component
+- Rewrote FeedbackDashboard to use a click-to-categorize approach with Select dropdowns instead of drag-and-drop
+- Cleaned up FeedbackCard to only export CORRECT_CATEGORIES (removed useDraggable hook)
+- Cleaned up CategoryBucket to remove useDroppable hook and @dnd-kit dependency
+- Kept all other functionality (analysis view, scoring view, etc.) intact
+- Lint passes clean, dev server compiles successfully
+
+Stage Summary:
+- Feedback Analysis now uses dropdown selectors for categorization instead of drag-and-drop
+- More reliable rendering, no dependency on @dnd-kit runtime behavior
+- More mobile-friendly interaction pattern
+- All scoring and analysis features preserved

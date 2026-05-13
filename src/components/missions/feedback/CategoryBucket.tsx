@@ -1,14 +1,11 @@
 'use client';
 
-import { useDroppable } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
 import type { FeedbackItem } from '@/lib/stores/types';
-import { useFeedbackStore } from '@/lib/stores/feedback-store';
 
 // --- Category definitions ---
 export const CATEGORY_DEFINITIONS = [
@@ -25,30 +22,17 @@ export const CATEGORY_DEFINITIONS = [
 interface CategoryBucketProps {
   category: string;
   items: FeedbackItem[];
+  onRemoveItem?: (itemId: string) => void;
 }
 
-export default function CategoryBucket({ category, items }: CategoryBucketProps) {
-  const uncategorizeItem = useFeedbackStore((s) => s.uncategorizeItem);
-
+export default function CategoryBucket({ category, items, onRemoveItem }: CategoryBucketProps) {
   const def = CATEGORY_DEFINITIONS.find((c) => c.name === category);
   const icon = def?.icon ?? '📁';
   const gradient = def?.color ?? 'from-slate-400 to-slate-500';
 
-  const { isOver, setNodeRef } = useDroppable({
-    id: `bucket-${category}`,
-    data: { category },
-  });
-
   return (
     <motion.div layout>
-      <Card
-        ref={setNodeRef}
-        className={`rounded-xl border-2 transition-all duration-200 py-0 gap-0 ${
-          isOver
-            ? 'border-amber-400 shadow-lg shadow-amber-100 scale-[1.01]'
-            : 'border-slate-200 shadow-sm hover:shadow-md'
-        }`}
-      >
+      <Card className="rounded-xl border-2 border-slate-200 shadow-sm py-0 gap-0 hover:shadow-md transition-shadow">
         {/* Header with gradient */}
         <div className={`bg-gradient-to-r ${gradient} rounded-t-[10px] px-4 py-2.5`}>
           <div className="flex items-center justify-between">
@@ -65,17 +49,11 @@ export default function CategoryBucket({ category, items }: CategoryBucketProps)
         {/* Items area */}
         <CardContent className="p-3">
           {items.length === 0 ? (
-            <div
-              className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                isOver ? 'border-amber-300 bg-amber-50' : 'border-slate-200'
-              }`}
-            >
-              <p className="text-xs text-slate-400">
-                {isOver ? 'Drop here!' : 'Drag feedback items here'}
-              </p>
+            <div className="border-2 border-dashed border-slate-200 rounded-lg p-3 text-center">
+              <p className="text-xs text-slate-400">No items assigned yet</p>
             </div>
           ) : (
-            <ScrollArea className="max-h-40">
+            <ScrollArea className="max-h-32">
               <div className="space-y-1.5">
                 <AnimatePresence>
                   {items.map((item) => (
@@ -98,14 +76,16 @@ export default function CategoryBucket({ category, items }: CategoryBucketProps)
                       <p className="text-[11px] text-slate-600 leading-snug flex-1 line-clamp-2">
                         {item.text}
                       </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                        onClick={() => uncategorizeItem(item.id)}
-                      >
-                        <X className="h-3 w-3 text-slate-400" />
-                      </Button>
+                      {onRemoveItem && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          onClick={() => onRemoveItem(item.id)}
+                        >
+                          <span className="text-xs text-slate-400 hover:text-rose-500">×</span>
+                        </Button>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
