@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,20 +7,224 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Player {
   id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  nickname  String
+  avatar    String   @default("default")
+  xp        Int      @default(0)
+  level     Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  roomPlayers    RoomPlayer[]
+  scores         Score[]
+  badges         PlayerBadge[]
+  surveys        Survey[]
+  surveyResponses SurveyResponse[]
+  dialogueLogs   DialogueLog[]
+  feedbackAnalyses FeedbackAnalysis[]
+  improvementPlans ImprovementPlan[]
 }
 
-model Post {
+model Teacher {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  nickname  String
+  passcode  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  sessions TeacherSession[]
+}
+
+model Room {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  name             String
+  mode             String    @default("COOP")
+  status           String    @default("LOBBY")
+  maxPlayers       Int       @default(4)
+  currentMissionId String?
+  timerSeconds     Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  completedAt      DateTime?
+
+  players  RoomPlayer[]
+  missions RoomMission[]
+}
+
+model RoomPlayer {
+  id       String   @id @default(cuid())
+  roomId   String
+  playerId String
+  role     String   @default("PLAYER")
+  gameRole String?
+  isReady  Boolean  @default(false)
+  joinedAt DateTime @default(now())
+
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, playerId])
+}
+
+model TeacherSession {
+  id        String    @id @default(cuid())
+  teacherId String
+  isActive  Boolean   @default(true)
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+}
+
+model MissionTemplate {
+  id            String   @id @default(cuid())
+  type          String
+  title         String
+  description   String
+  difficulty    String   @default("BEGINNER")
+  scenarioData  String   @default("{}")
+  scoringRubric String   @default("{}")
+  estimatedMin  Int      @default(15)
+  createdAt     DateTime @default(now())
+
+  roomMissions RoomMission[]
+}
+
+model RoomMission {
+  id               String    @id @default(cuid())
+  roomId           String
+  missionTemplateId String
+  order            Int       @default(0)
+  status           String    @default("PENDING")
+  startedAt        DateTime?
+  completedAt      DateTime?
+
+  room           Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  missionTemplate MissionTemplate @relation(fields: [missionTemplateId], references: [id], onDelete: Cascade)
+  scores         Score[]
+  surveys        Survey[]
+  dialogueLogs   DialogueLog[]
+  feedbackAnalyses FeedbackAnalysis[]
+  improvementPlans ImprovementPlan[]
+
+  @@unique([roomId, order])
+}
+
+model Score {
+  id                String   @id @default(cuid())
+  playerId          String
+  roomMissionId     String
+  points            Int      @default(0)
+  breakdown         String   @default("{}")
+  clientSatisfaction Int     @default(0)
+  timeTakenSec      Int      @default(0)
+  completedAt       DateTime @default(now())
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  roomMission RoomMission @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  description String
+  icon        String
+  requirement String
+  category    String
+  xpReward    Int    @default(0)
+
+  playerBadges PlayerBadge[]
+}
+
+model PlayerBadge {
+  id       String   @id @default(cuid())
+  playerId String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  badge  Badge  @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, badgeId])
+}
+
+model Survey {
+  id           String   @id @default(cuid())
+  roomMissionId String
+  playerId     String
+  title        String
+  description  String   @default("")
+  createdAt    DateTime @default(now())
+
+  roomMission RoomMission      @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
+  player      Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  questions   SurveyQuestion[]
+  responses   SurveyResponse[]
+}
+
+model SurveyQuestion {
+  id       String  @id @default(cuid())
+  surveyId String
+  order    Int     @default(0)
+  type     String
+  text     String
+  options  String  @default("[]")
+  required Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  surveyId    String
+  playerId    String
+  answers     String   @default("{}")
+  submittedAt DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model DialogueLog {
+  id               String   @id @default(cuid())
+  playerId         String
+  roomMissionId    String
+  nodeId           String
+  selectedOptionId String?
+  aiGenerated      Boolean  @default(false)
+  timestamp        DateTime @default(now())
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  roomMission RoomMission @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
+}
+
+model FeedbackAnalysis {
+  id            String   @id @default(cuid())
+  playerId      String
+  roomMissionId String
+  responseId    String?
+  category      String
+  sentiment     String   @default("NEUTRAL")
+  isCorrect     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  roomMission RoomMission @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
+}
+
+model ImprovementPlan {
+  id              String   @id @default(cuid())
+  playerId        String
+  roomMissionId   String
+  recommendations String   @default("[]")
+  actionItems     String   @default("[]")
+  overallScore    Float    @default(0)
+  createdAt       DateTime @default(now())
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  roomMission RoomMission @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
 }

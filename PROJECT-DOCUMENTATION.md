@@ -1,394 +1,253 @@
-# Junior IT Consultant Adventure — Project Documentation
+# ICT Support Pro — Project Documentation
 
-> **Save this file!** It contains everything you need to reuse, modify, or redeploy this project in the future.
+> **Save this file!** It contains everything you need to reuse, modify, or redeploy this project.
 
 ---
 
 ## 1. Project Overview
 
-**Name**: Junior IT Consultant Adventure  
-**Type**: Interactive Educational Web Game  
-**Target Audience**: Vocational IT students (AQF Level 2-3)  
-**Subject**: Identify and Document Client Requirements  
+**Name**: ICT Support Pro — Customer Service Training Simulator  
+**Type**: Interactive Educational Role-Play Simulation Game  
+**Target Audience**: Vocational ICT students (AQF Level 2-3)  
+**Subject**: Customer Service, Evaluation Tools & Client Feedback Collection  
 **Framework**: Next.js 16 + React 19 + TypeScript 5  
 **Styling**: Tailwind CSS 4 + shadcn/ui  
-**State Management**: Zustand (with localStorage persistence)  
-**Total Game Code**: ~7,870 lines across 14 files  
+**State Management**: Zustand (6 independent stores with localStorage persistence)  
+**Database**: Prisma ORM + SQLite  
+**Real-time**: Socket.io mini-service (port 3001)  
+**AI**: z-ai-web-dev-sdk (server-side only, via API routes)  
+**Total Custom Code**: ~12,500 lines across 78 files  
 
 ---
 
 ## 2. Game Features
 
-### 5 Client Scenarios
+### Two Play Modes
 
-| # | Scenario ID | Title | Client | Difficulty | Icon |
-|---|---|---|---|---|---|
-| 1 | `school-laptops` | School Laptop Upgrade | Mrs. Sarah Davis (Principal) | Beginner | 🏫 |
-| 2 | `printer-issue` | Print Shop Problems | Mr. Jake Thompson (Business Owner) | Intermediate | 🖨️ |
-| 3 | `network-upgrade` | Network Nightmares | Ms. Lisa Chen (Office Manager) | Advanced | 🌐 |
-| 4 | `teacher-software` | Software Solutions | Mr. Raj Patel (IT Teacher) | Beginner | 📚 |
-| 5 | `remote-worker` | Remote Access Rescue | Ms. Ana Martinez (Ops Director) | Intermediate | 🏠 |
+| Mode | Description |
+|---|---|
+| **Solo Mode** | Single player with AI-controlled clients, coworkers, and managers |
+| **Multiplayer Mode** | 2-6 players join by room code, collaborate on missions in real-time |
 
-### 7 Game Phases (per scenario)
+### 5 Mission Types
 
-1. **Scenario Intro** — Meet the client, read their background
-2. **Dialogue** — Conversation simulator with 3-4 dialogue nodes, each with 4 response options (open, closed, clarification, probing, poor)
-3. **Active Listening** — Drag-and-drop categorization of requirements into categories (budget, technical, policy, etc.)
-4. **Questioning** — Multiple-choice mini-game about question types
-5. **Guidelines** — Organisational policy compliance challenges
-6. **Documentation** — Fill out requirement documentation forms
-7. **Recommendation** — Compare 3 solutions, write analysis, recommend the best one
+| # | Mission | Type | Description |
+|---|---|---|---|
+| 1 | Survey Builder | `survey-builder` | Create customer feedback surveys with quantitative/qualitative questions |
+| 2 | Customer Interview | `customer-interview` | Interview AI clients, ask open-ended questions, discover hidden needs |
+| 3 | Feedback Analysis | `feedback-analysis` | Categorise survey responses, identify trends, analyze sentiment |
+| 4 | Difficult Client | `difficult-client` | De-escalate angry/frustrated clients with professional communication |
+| 5 | Service Improvement | `service-improvement` | Create improvement plans based on collected feedback |
 
 ### Scoring System
 
-- **Client Satisfaction** (0-100): Based on dialogue trust level
-- **Professionalism** (0-100): Average of guidelines + documentation scores
-- **Communication** (0-100): Average of dialogue + questioning scores
-- **Requirement Accuracy** (0-100): Average of listening + documentation + recommendation scores
+- **Points** per mission based on rubric evaluation
+- **XP** earned, leading to level-ups (200 XP per level)
+- **10 Achievement Badges** with XP rewards
+- **Leaderboard** (global and room-scoped)
+- **Client Satisfaction Meter** (0-100) in interview/difficult client missions
 
-### 10 Badges/Achievements
+### Badges
 
-| Badge | Icon | Requirement |
-|---|---|---|
-| Active Listener | 👂 | 80%+ on any Listening challenge |
-| Investigation Expert | 🔍 | 80%+ on any Questioning challenge |
-| Requirements Detective | 📋 | 80%+ on any Documentation challenge |
-| Client Communication Master | 💬 | 90%+ client satisfaction |
-| Policy Pro | 📜 | 100% on any Guidelines challenge |
-| Budget Guardian | 💰 | Choose budget-appropriate solutions in 3 scenarios |
-| First Steps | ⭐ | Complete any scenario |
-| IT Consultant Graduate | 🎓 | Complete all 5 scenarios |
-| Perfect Consultant | 🏆 | 100% on any scenario |
-| Quick Thinker | ⚡ | 90%+ communication in any scenario |
+| Badge | Icon | Requirement | XP |
+|---|---|---|---|
+| First Steps | ⭐ | Complete your first mission | 50 |
+| Survey Master | 📋 | Score 80%+ on Survey Builder | 100 |
+| Interview Pro | 🎤 | Score 80%+ on Customer Interview | 100 |
+| Data Detective | 🔍 | Score 80%+ on Feedback Analysis | 100 |
+| De-escalation Expert | 🕊️ | Score 80%+ on Difficult Client | 150 |
+| Improvement Champion | 🚀 | Score 80%+ on Service Improvement | 150 |
+| Team Player | 🤝 | Complete a multiplayer session | 75 |
+| Perfectionist | 💎 | Score 100% on any mission | 200 |
+| All-Rounder | 🏆 | Complete all 5 missions | 300 |
+| Feedback Guru | 📊 | Complete 3 feedback analysis missions | 125 |
 
 ---
 
 ## 3. Project Structure
 
 ```
-my-project/
-├── src/
-│   ├── app/
-│   │   ├── api/route.ts          # Placeholder API route (unused by game)
-│   │   ├── globals.css           # Global styles + Tailwind
-│   │   ├── layout.tsx            # Root layout (fonts, metadata, Toaster)
-│   │   └── page.tsx              # Main game page (phase router)
-│   │
-│   ├── components/
-│   │   ├── game/                 # 🎮 GAME-SPECIFIC COMPONENTS
-│   │   │   ├── AchievementPopup.tsx    # Badge unlock animation overlay
-│   │   │   ├── ActiveListeningGame.tsx # Drag-and-drop categorization
-│   │   │   ├── DialogueSystem.tsx      # Conversation simulator
-│   │   │   ├── DocumentationSystem.tsx # Requirement form + evaluation
-│   │   │   ├── GameDashboard.tsx       # Scenario selection screen
-│   │   │   ├── GameHeader.tsx          # Top bar (logo, phase, score, hint)
-│   │   │   ├── GuidelinesChallenge.tsx # Policy compliance questions
-│   │   │   ├── QuestioningGame.tsx     # Question type mini-game
-│   │   │   ├── RecommendationEngine.tsx # Solution comparison + selection
-│   │   │   ├── ScenarioIntro.tsx       # Client introduction screen
-│   │   │   └── ScenarioSummary.tsx     # End-of-scenario score breakdown
-│   │   │
-│   │   └── ui/                  # shadcn/ui base components (50+ files)
-│   │
-│   ├── hooks/
-│   │   ├── use-mobile.ts        # Mobile detection hook
-│   │   └── use-toast.ts         # Toast notification hook
-│   │
-│   └── lib/
-│       ├── game-data.ts         # 📊 ALL GAME DATA (scenarios, dialogues, etc.)
-│       ├── game-store.ts        # 🧠 ZUSTAND STORE (state management)
-│       ├── game-types.ts        # 📝 TypeScript type definitions
-│       ├── db.ts                # Prisma client (unused by game)
-│       └── utils.ts             # Utility functions (cn helper)
+src/
+├── app/
+│   ├── page.tsx                       # SINGLE ROUTE - phase switcher
+│   ├── layout.tsx                     # Root layout
+│   ├── globals.css                    # Global styles
+│   └── api/                           # Backend API routes
+│       ├── auth/login/                # Player login
+│       ├── missions/                  # Mission templates
+│       ├── scores/                    # Score submission + leaderboard
+│       ├── surveys/                   # Survey save + evaluate
+│       ├── dialogue/                  # AI dialogue generation
+│       ├── feedback/analyze/          # AI sentiment analysis
+│       ├── improvement/               # Improvement plan saving
+│       └── teacher/                   # Teacher login + dashboard
 │
-├── prisma/
-│   └── schema.prisma            # Database schema (unused by game)
+├── components/
+│   ├── login/                         # Login screens
+│   │   ├── NicknameEntry.tsx          # Main login with avatar picker
+│   │   ├── ModeSelector.tsx           # Solo vs Multiplayer
+│   │   └── RoomCodeEntry.tsx          # Room code input
+│   ├── lobby/                         # Multiplayer lobby
+│   │   ├── LobbyRoom.tsx              # Waiting room
+│   │   ├── PlayerCard.tsx             # Player display
+│   │   └── RoomChat.tsx               # Lobby chat
+│   ├── game/                          # Core game UI
+│   │   ├── GameDashboard.tsx          # Mission selection
+│   │   ├── MissionCard.tsx            # Mission card in grid
+│   │   └── AchievementPopup.tsx       # Badge unlock overlay
+│   ├── missions/                      # Mission components
+│   │   ├── MissionBriefing.tsx        # Mission intro
+│   │   ├── MissionSummary.tsx         # Score breakdown
+│   │   ├── survey/                    # 6 files: SurveyBuilder, Canvas, Palette, etc.
+│   │   ├── interview/                 # 5 files: InterviewScreen, Chat, etc.
+│   │   ├── feedback/                  # 5 files: FeedbackDashboard, CategoryBucket, etc.
+│   │   ├── difficult-client/          # 5 files: DifficultClientScreen, etc.
+│   │   └── improvement/               # 5 files: ImprovementScreen, etc.
+│   ├── shared/                        # Shared components
+│   │   ├── GameHeader.tsx, XpBar.tsx, TimerDisplay.tsx, etc.
+│   ├── teacher/                       # Teacher dashboard
+│   │   ├── TeacherDashboard.tsx, RoomManager, StudentProgress, etc.
+│   └── ui/                            # 57 shadcn/ui components
 │
-├── public/                      # Static assets
-├── package.json                 # Dependencies
-├── next.config.ts               # Next.js configuration
-├── tailwind.config.ts           # Tailwind CSS configuration
-├── tsconfig.json                # TypeScript configuration
-└── PROJECT-DOCUMENTATION.md     # ← THIS FILE
+├── hooks/
+│   ├── use-socket.ts                  # Socket.io connection hook
+│   ├── use-mobile.ts, use-toast.ts    # Utility hooks
+│
+├── lib/
+│   ├── stores/                        # 7 Zustand stores
+│   │   ├── game-store.ts              # Main game state (persist)
+│   │   ├── survey-store.ts            # Survey builder state
+│   │   ├── dialogue-store.ts          # Dialogue/interview state
+│   │   ├── feedback-store.ts          # Feedback analysis state
+│   │   ├── improvement-store.ts       # Service improvement state
+│   │   ├── room-store.ts             # Multiplayer room state
+│   │   └── types.ts                   # All type definitions
+│   ├── constants.ts                   # Game constants, mission defs, badges
+│   ├── scoring.ts                     # Scoring rubric functions
+│   ├── ai-prompts.ts                  # AI system prompts
+│   ├── db.ts                          # Prisma client
+│   └── utils.ts                       # Utility functions
+│
+├── mini-services/
+│   └── socket-server/                 # Socket.io mini-service (port 3001)
+│       ├── index.ts                   # Server entry point
+│       └── package.json               # Independent bun project
+│
+└── prisma/
+    ├── schema.prisma                  # 16 database models
+    └── seed.ts                        # 5 mission templates + 10 badges
 ```
 
 ---
 
-## 4. Key Files to Modify
+## 4. How to Run Locally
 
-### To add a new client scenario:
-→ Edit **`src/lib/game-data.ts`** — copy an existing scenario object and modify it
-
-### To change game logic/scoring:
-→ Edit **`src/lib/game-store.ts`** — contains all state management and score calculations
-
-### To add new types:
-→ Edit **`src/lib/game-types.ts`** — all TypeScript interfaces defined here
-
-### To change a specific game phase UI:
-→ Edit the corresponding component in **`src/components/game/`**
-
-### To change the overall layout:
-→ Edit **`src/app/page.tsx`** (game phase router) or **`src/app/layout.tsx`** (root layout)
-
----
-
-## 5. How to Run Locally
-
-### Prerequisites
-- **Node.js** >= 18.x OR **Bun** >= 1.x
-- **npm** or **bun** package manager
-
-### Steps
 ```bash
 # 1. Install dependencies
 npm install
-# or: bun install
 
-# 2. Start development server
-npm run dev
-# or: bun run dev
+# 2. Set up database
+npx prisma db push
+npx prisma db seed   # or: bun run prisma/seed.ts
 
-# 3. Open in browser
-# http://localhost:3000
-```
+# 3. Start the Next.js dev server
+npm run dev           # http://localhost:3000
 
-### Other commands
-```bash
-npm run lint       # Check code quality
-npm run build      # Production build
-npm run start      # Start production server (after build)
+# 4. (Optional) Start the Socket.io server for multiplayer
+cd mini-services/socket-server
+npm install
+npm run dev           # ws://localhost:3001
 ```
 
 ---
 
-## 6. How to Deploy (Free Options)
+## 5. How to Deploy
 
-### Option A: Vercel (Recommended — Zero Changes)
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com) → Sign up with GitHub
-3. Import your repo → Deploy
-4. Get a permanent URL like `your-game.vercel.app`
+### Vercel (Recommended - Free)
+1. Push to GitHub
+2. Connect repo on [vercel.com](https://vercel.com)
+3. Deploy — auto-detects Next.js
+4. **Note**: Socket.io mini-service needs separate hosting (Render/Railway free tier, or teacher's machine)
 
-### Option B: Cloudflare Pages (Free, Global CDN)
+### Cloudflare Pages
 1. Change `next.config.ts`: set `output: "export"` and `images: { unoptimized: true }`
-2. Delete `src/app/api/route.ts` (not needed)
-3. Push to GitHub
-4. Go to [Cloudflare Pages](https://dash.cloudflare.com) → Connect repo → Deploy
-
-### Option C: VPS / Docker
-```bash
-# Build standalone output (change next.config.ts back to output: "standalone")
-npm run build
-NODE_ENV=production node .next/standalone/server.js
-```
+2. Push to GitHub → Connect on Cloudflare Pages
+3. Socket.io requires separate hosting
 
 ---
 
-## 7. How to Add a New Scenario
+## 6. How to Add a New Mission
 
-Here's a template — copy this and fill in your content in `src/lib/game-data.ts`:
-
-```typescript
-const newScenario: Scenario = {
-  id: 'unique-scenario-id',
-  title: 'Scenario Title',
-  subtitle: 'Short subtitle',
-  description: 'Longer description for the dashboard card',
-  difficulty: 'beginner', // 'beginner' | 'intermediate' | 'advanced'
-  icon: '💻', // emoji
-  color: 'amber', // tailwind color name
-  client: {
-    id: 'client-id',
-    name: 'Client Name',
-    role: 'Job Title',
-    organization: 'Company Name',
-    avatar: '👨‍💼', // emoji avatar
-    personality: 'Description of personality for AI/hints',
-    emotionalState: 'neutral', // 'happy' | 'frustrated' | 'confused' | 'worried' | 'neutral' | 'excited'
-    budget: '$10,000',
-    hiddenRequirements: [
-      'Requirement the student must discover',
-      'Another hidden requirement',
-    ],
-  },
-  dialogue: [
-    {
-      id: 'd1',
-      speaker: 'client',
-      text: 'What the client says...',
-      emotion: 'neutral',
-      isIntro: true,
-      options: [
-        {
-          id: 'd1-a',
-          text: 'Your response text (open question)',
-          type: 'open', // 'open' | 'closed' | 'clarification' | 'probing' | 'strategic' | 'poor'
-          score: 10,    // -5 to 10
-          clientResponse: 'Client replies...',
-          clientEmotion: 'happy',
-          unlocksInfo: 'Information revealed (optional)',
-          feedback: 'Educational feedback shown to student',
-          isCorrect: true,
-        },
-        // Add 3-4 options per dialogue node
-      ],
-    },
-    // Add 3-4 dialogue nodes per scenario
-  ],
-  listeningItems: [
-    { id: 'li1', text: 'Fact the student should identify', category: 'technical', isImportant: true },
-    { id: 'li2', text: 'Distractor item', category: 'technical', isImportant: false },
-    // Categories: 'budget' | 'timeline' | 'technical' | 'policy' | 'support' | 'compatibility' | 'training'
-  ],
-  questionChallenges: [
-    {
-      id: 'qc1',
-      situation: 'A scenario description...',
-      options: [
-        { id: 'qc1-a', text: 'Option A', type: 'open', isBest: true, feedback: 'Why this is best' },
-        { id: 'qc1-b', text: 'Option B', type: 'closed', isBest: false, feedback: 'Why this is not best' },
-        // Add 4 options per challenge
-      ],
-      correctAnswer: 'qc1-a',
-    },
-    // Add 3-4 question challenges
-  ],
-  guidelines: [
-    {
-      id: 'g1',
-      title: 'Policy Challenge Title',
-      description: 'The situation the student faces...',
-      policy: 'The organisational policy text...',
-      options: [
-        { id: 'g1-a', text: 'Option that violates policy', followsGuidelines: false, feedback: 'Why this violates policy', score: 0 },
-        { id: 'g1-b', text: 'Option that follows policy best', followsGuidelines: true, feedback: 'Why this is correct', score: 10 },
-        // Add 4 options per guideline
-      ],
-      correctAnswer: 'g1-b',
-    },
-    // Add 1-3 guideline challenges
-  ],
-  documentationFields: [
-    { id: 'doc1', label: 'Field Name', placeholder: 'What to enter', required: true, category: 'technical', correctValues: ['keyword1', 'keyword2'] },
-    // Add 6-8 documentation fields
-  ],
-  solutions: [
-    {
-      id: 'sol1',
-      name: 'Budget Option',
-      description: 'Basic solution description',
-      cost: '$5,000',
-      advantages: ['Pro 1', 'Pro 2'],
-      disadvantages: ['Con 1', 'Con 2'],
-      suitability: 2,          // 1-5 rating
-      supportLevel: 'basic',   // 'basic' | 'standard' | 'premium'
-      meetsRequirements: false,
-      meetsBudget: true,
-      followsPolicy: true,
-    },
-    {
-      id: 'sol2',
-      name: 'Best Option',
-      description: 'Ideal solution that meets all requirements',
-      cost: '$9,000',
-      advantages: ['Pro 1', 'Pro 2', 'Pro 3'],
-      disadvantages: ['Con 1'],
-      suitability: 5,
-      supportLevel: 'standard',
-      meetsRequirements: true,
-      meetsBudget: true,
-      followsPolicy: true,
-    },
-    {
-      id: 'sol3',
-      name: 'Premium Option',
-      description: 'Over-specified expensive solution',
-      cost: '$20,000',
-      advantages: ['Pro 1', 'Pro 2', 'Pro 3', 'Pro 4'],
-      disadvantages: ['Over budget', 'Over-specified'],
-      suitability: 3,
-      supportLevel: 'premium',
-      meetsRequirements: true,
-      meetsBudget: false,
-      followsPolicy: true,
-    },
-  ],
-  learningObjectives: [
-    'Objective 1',
-    'Objective 2',
-  ],
-  keyConcepts: [
-    'Concept 1',
-    'Concept 2',
-  ],
-};
-
-// Don't forget to add it to the ALL_SCENARIOS array:
-export const ALL_SCENARIOS: Scenario[] = [
-  schoolLaptopsScenario,
-  printerScenario,
-  networkScenario,
-  teacherSoftwareScenario,
-  remoteWorkerScenario,
-  newScenario,  // ← Add here
-];
-```
+1. Add mission type to `src/lib/stores/types.ts` (MissionType union)
+2. Add mission definition to `src/lib/constants.ts` (MISSION_TYPES array)
+3. Create scenario data in `prisma/seed.ts` or database
+4. Create a scoring function in `src/lib/scoring.ts`
+5. Create mission components in `src/components/missions/your-mission/`
+6. Wire into `src/app/page.tsx` phase switcher
 
 ---
 
-## 8. Dependencies (What You Need)
+## 7. Key Files to Modify
 
-### Runtime Dependencies (Key Ones)
-| Package | Version | Purpose |
-|---|---|---|
-| `next` | ^16.1.1 | Framework |
-| `react` | ^19.0.0 | UI library |
-| `zustand` | ^5.0.6 | State management + localStorage persistence |
-| `framer-motion` | ^12.23.2 | Animations (dialogue, phase transitions, achievements) |
-| `@dnd-kit/core` | ^6.3.1 | Drag-and-drop (active listening game) |
-| `lucide-react` | ^0.525.0 | Icons |
-| `tailwind-merge` | ^3.3.1 | Tailwind class merging |
-| `sonner` | ^2.0.6 | Toast notifications |
-
-### Full list is in `package.json` — run `npm install` to install all.
-
----
-
-## 9. Known Issues & Fixes Applied
-
-| Date | Issue | Fix |
-|---|---|---|
-| Bug fix | Organisational Guidelines phase broke for scenarios with only 1 guideline (4 of 5 scenarios) | Removed premature `currentGuidelineIndex++` from `answerGuideline()` in game-store.ts; added separate `nextGuideline()` action called only when user clicks "Next" |
-| Config | `output: "standalone"` in next.config.ts was for Docker/VPS | Removed for Vercel compatibility (Vercel handles output automatically) |
-
----
-
-## 10. Browser Compatibility
-
-| Browser | Minimum Version |
+| Task | File |
 |---|---|
-| Chrome | 90+ |
-| Firefox | 90+ |
-| Safari | 15+ |
-| Edge | 90+ |
-
-**Requires**: JavaScript enabled, LocalStorage enabled (for game saves)  
-**Works on**: Desktop, tablet, and mobile (fully responsive)
+| Add new scenarios | `prisma/seed.ts` → MissionTemplate.scenarioData |
+| Change scoring logic | `src/lib/scoring.ts` |
+| Change game constants | `src/lib/constants.ts` |
+| Modify AI prompts | `src/lib/ai-prompts.ts` |
+| Add new badges | `src/lib/constants.ts` BADGE_DEFINITIONS |
+| Change state management | `src/lib/stores/*.ts` |
+| Modify multiplayer events | `mini-services/socket-server/index.ts` |
 
 ---
 
-## 11. File Sizes (Approximate)
+## 8. Database Schema (16 Models)
 
-| Item | Size |
+| Model | Purpose |
 |---|---|
-| Source code (`src/`) | ~200 KB |
-| Full project (with node_modules) | ~1.5 GB |
-| Production build (`.next/`) | ~271 MB |
-| Standalone build (`.next/standalone/`) | ~75 MB |
-| Zip archive (no node_modules/.next) | ~14 MB |
+| Player | Student profiles with XP/level |
+| Teacher | Teacher accounts with passcode |
+| Room | Game rooms with codes |
+| RoomPlayer | Player-room junction with roles |
+| TeacherSession | Active teacher sessions |
+| MissionTemplate | Reusable mission definitions |
+| RoomMission | Mission instances per room |
+| Score | Per-mission scoring |
+| Badge / PlayerBadge | Achievement system |
+| Survey / SurveyQuestion / SurveyResponse | Survey builder data |
+| DialogueLog | Conversation tracking |
+| FeedbackAnalysis | Feedback categorization |
+| ImprovementPlan | Service improvement records |
 
 ---
 
-*Generated on: March 2025*  
-*Project built with Z.ai Code Assistant*
+## 9. API Routes
+
+| Route | Method | Description |
+|---|---|---|
+| `/api/auth/login` | POST | Login/create player |
+| `/api/missions` | GET | List all missions |
+| `/api/missions/[id]` | GET | Get mission details |
+| `/api/scores` | POST | Submit score + update XP |
+| `/api/scores/leaderboard` | GET | Top 20 players |
+| `/api/surveys` | POST | Save survey |
+| `/api/surveys/evaluate` | POST | Evaluate survey quality |
+| `/api/dialogue` | POST | AI customer dialogue |
+| `/api/feedback/analyze` | POST | AI sentiment analysis |
+| `/api/improvement` | POST | Save improvement plan |
+| `/api/teacher` | POST | Teacher login |
+| `/api/teacher/dashboard` | GET | Class analytics data |
+
+---
+
+## 10. Socket.io Events
+
+### Client → Server
+`room:create`, `room:join`, `room:leave`, `room:ready`, `room:chat`, `mission:start`, `mission:progress`, `mission:complete`
+
+### Server → Client
+`room:created`, `room:updated`, `room:player-joined`, `room:player-left`, `room:chat`, `mission:started`, `mission:timer-tick`, `mission:player-completed`, `leaderboard:update`, `error`
+
+---
+
+*Generated: May 2025 — Built with Z.ai Code Assistant*

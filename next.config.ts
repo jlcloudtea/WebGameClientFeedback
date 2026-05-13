@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  transpilePackages: ['socket.io-client'],
 };
 
 export default nextConfig;
