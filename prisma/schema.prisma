@@ -9,7 +9,7 @@ datasource db {
 
 model Player {
   id        String   @id @default(cuid())
-  nickname  String
+  nickname  String   @unique
   avatar    String   @default("default")
   xp        Int      @default(0)
   level     Int      @default(1)
@@ -115,15 +115,15 @@ model RoomMission {
 model Score {
   id                String   @id @default(cuid())
   playerId          String
-  roomMissionId     String
+  roomMissionId     String?
   points            Int      @default(0)
   breakdown         Json     @default("{}")
   clientSatisfaction Int     @default(0)
   timeTakenSec      Int      @default(0)
   completedAt       DateTime @default(now())
 
-  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  roomMission RoomMission @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
+  player      Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  roomMission RoomMission? @relation(fields: [roomMissionId], references: [id], onDelete: Cascade)
 }
 
 model Badge {

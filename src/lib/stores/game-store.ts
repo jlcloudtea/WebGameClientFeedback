@@ -223,6 +223,26 @@ export const useGameStore = create<GameState & GameActions>()(
           showAchievement: newBadges.length > 0 ? true : state.showAchievement,
           latestBadgeId: firstNewBadge,
         });
+
+        // --- Submit score to database (non-blocking) ---
+        if (state.nickname) {
+          fetch('/api/scores/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nickname: state.nickname,
+              avatar: state.avatar,
+              missionType: score.missionType,
+              totalScore: score.totalScore,
+              xpEarned: score.xpEarned,
+              empathy: score.empathy,
+              professionalism: score.professionalism,
+              timeTakenSec: 0,
+            }),
+          }).catch(() => {
+            // Silently fail — game works offline with localStorage
+          });
+        }
       },
 
       addXp: (amount) => {

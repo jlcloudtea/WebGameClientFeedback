@@ -20,11 +20,25 @@ export default function NicknameEntry() {
 
   const canProceed = inputNickname.trim().length >= 2;
 
-  const handleSoloStart = () => {
+  const handleSoloStart = async () => {
     if (!canProceed) return;
     const playerId = `player-${Date.now()}`;
     login(playerId, inputNickname.trim(), selectedAvatar);
     setPhase('dashboard');
+
+    // Register player in the database (non-blocking)
+    try {
+      await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: inputNickname.trim(),
+          avatar: selectedAvatar,
+        }),
+      });
+    } catch {
+      // Silently fail — game works offline with localStorage
+    }
   };
 
   return (
